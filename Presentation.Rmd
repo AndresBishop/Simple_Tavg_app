@@ -1,0 +1,71 @@
+---
+title: "Daily Average Temperature"
+author: "Andrés Bishop"
+date: "2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Overview
+
+"Daily Average Temperature" is my very first simple shiny app that shows average daily temperature from three cities in Catalonia in a time span of 1 to 60 days. The user can choose the beginning day, the numbert of days to display and the city from which data comes from. The data is showed in a line graphic, using the plotly library.
+
+## Data Acquisition
+
+Data is acquired from the DAILY GLOBAL HISTORICAL CLIMATOLOGY NETWORK (GHCN-DAILY) Version 3.22 of the NOAA National Climatic Data Center (http://doi.org/10.7289/V5D21VHZ) using the rnoaa library and filtered to obtain data frames with the following data:
+  
+  ```{r, echo=FALSE, warning=FALSE, message=FALSE, cache=FALSE, results=TRUE, prompt=FALSE, source=TRUE, include=TRUE}
+library(plotly)
+library("rnoaa")
+knitr::opts_knit$set(progress = FALSE, verbose = FALSE)
+Reus<-ghcnd(stationid = "SPE00120530")
+monitorsReus <- Reus$id
+all_monitors_clean <- meteo_pull_monitors(monitorsReus,
+                                          date_min = "2016-03-01",
+                                          date_max = "2016-03-31") %>%
+  rename(day = date,
+         location = id)
+plotReus<-all_monitors_clean[,c(2:6)]
+plotReus["Station"]<-"Reus"
+plotReus$tmax <- plotReus$tmax/10
+plotReus$tmin <- plotReus$tmin/10
+plotReus$tavg <- plotReus$tavg/10
+plotReus %>% head() %>% knitr::kable()
+```
+
+## Plotting the data
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, cache=FALSE, results=TRUE, prompt=FALSE, source=FALSE, include=TRUE}
+
+library("plotly")
+library("rnoaa")
+library("webshot")
+ p <- plot_ly(plotReus, x = ~day, y = ~tavg, color = ~Station, type = 'scatter', mode = 'lines', 
+               showlegend = TRUE )%>%
+  layout(title = "Average Temperatures in Reus (Spain)",
+         paper_bgcolor='rgb(255,255,255)', plot_bgcolor='rgb(229,229,229)',
+         xaxis = list(title = "Days",
+                      gridcolor = 'rgb(255,255,255)',
+                      showgrid = TRUE,
+                      showline = FALSE,
+                      tickcolor = 'rgb(127,127,127)',
+                      ticks = 'outside',
+                      zeroline = FALSE),
+         yaxis = list(title = "Temperature (degrees C)",
+                      gridcolor = 'rgb(255,255,255)',
+                      showgrid = TRUE,
+                      showline = FALSE,
+                      tickcolor = 'rgb(127,127,127)',
+                      ticks = 'outside',
+                      zeroline = FALSE))
+```
+```{r, echo=FALSE, warning=FALSE, message=FALSE, cache=FALSE, results=TRUE, prompt=FALSE, source=TRUE, include=TRUE}
+p
+```
+
+## Fin
+
+Thank you!
